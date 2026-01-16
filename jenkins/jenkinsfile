@@ -10,8 +10,8 @@ pipeline {
                 }
             }
             steps {
-                 dir('tests-api'){
-                    sh 'go test -v ./...'
+                 dir('bugtracker-backend'){
+                    sh 'go test -v./...'
                  }
             }
         }
