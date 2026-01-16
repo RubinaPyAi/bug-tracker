@@ -18,5 +18,20 @@ pipeline {
         }
       }
     }
+
+stage('Frontend tests') {
+      agent {
+        docker {
+          image 'node:20'
+          reuseNode true
+        }
+      }
+      steps {
+        dir('bugtracker-frontend') {
+          sh 'npm install'
+          sh 'npm test'
+        }
+      }
+    }
   }
 }
