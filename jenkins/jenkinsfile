@@ -1,19 +1,19 @@
 pipeline {
-    agent any
+  agent any
 
-    stages {
-        stage('unit tests - backend') {
-            agent{
-                docker{
-                    image 'golang:1.22'
-                    reuseNode true
-                }
-            }
-            steps {
-                 dir('bugtracker-backend'){
-                    sh 'go test -v./...'
-                 }
-            }
+  stages {
+    stage('unit tests - backend') {
+      agent {
+        docker {
+          image 'golang:1.22'
+          reuseNode true
         }
+      }
+      steps {
+        dir('bugtracker-backend') {
+          sh 'go test -v ./...'
+        }
+      }
     }
+  }
 }
