@@ -5,7 +5,7 @@ pipeline {
         stage('unit tests - backend') {
             agent{
                 docker{
-                    image 'snakee/golang-junit:1'
+                    image 'golang:1.22'
                     reuseNode true
                 }
             }
