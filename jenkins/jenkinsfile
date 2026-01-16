@@ -10,9 +10,10 @@ pipeline {
                 }
             }
             steps {
-                 
-                    sh 'go test -v./...'
-                             }
+                 dir('tests-api'){
+                    sh 'go test -v ./...'
+                 }
+            }
         }
     }
 }
