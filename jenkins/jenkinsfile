@@ -13,16 +13,22 @@ pipeline {
           reuseNode true
         }
       }
+      environment {
+        GOCACHE = "${WORKSPACE}/.gocache"
+      }
       steps {
         dir('bugtracker-backend') {
           sh '''
+            echo "Setting up Go cache..."
+            mkdir -p "$GOCACHE"
+
             echo "Installing go-junit-report..."
             go install github.com/jstemmer/go-junit-report/v2@latest
 
             GO_JUNIT_BIN="$(go env GOPATH)/bin/go-junit-report"
             echo "Using go-junit-report at: $GO_JUNIT_BIN"
 
-            echo "Running Go tests..."
+            echo "Running backend tests..."
             go test -v ./... 2>&1 | "$GO_JUNIT_BIN" > test-results.xml
 
             echo "Backend test report generated:"
@@ -70,3 +76,4 @@ pipeline {
 
   }
 }
+
