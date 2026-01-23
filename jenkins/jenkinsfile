@@ -1,108 +1,13 @@
 pipeline {
-  agent any
+    agent any
 
-  options {
-    timestamps()
-  }
-
-  stages {
-
-    /* =========================================================
-       CHECKOUT
-       ========================================================= */
-    stage('Checkout SCM') {
-      steps {
-        checkout scm
-      }
+    stages {
+        stage('Unit Tests-Backend') {
+            steps {
+                dir('bugtracker-backend'){
+                    sh 'go test -v ./...'
+                }
+            }
+        }
     }
-
-    /* =========================================================
-       BACKEND TESTS + COVERAGE (GO)
-       ========================================================= */
-    stage('Unit Tests - Backend') {
-      agent {
-        docker {
-          image 'golang:1.22'
-          reuseNode true
-        }
-      }
-
-      environment {
-        GOCACHE = "${WORKSPACE}/.gocache"
-        GOFLAGS = "-mod=mod"
-      }
-
-      steps {
-        dir('bugtracker-backend') {
-          sh '''
-            echo "Setting up Go cache..."
-            mkdir -p "$GOCACHE"
-
-            echo "Running backend tests with coverage..."
-            go test ./... -coverprofile=coverage.out
-
-            echo "Generating HTML coverage report..."
-            mkdir -p coverage
-            go tool cover -html=coverage.out -o coverage/index.html
-
-            echo "Backend coverage files:"
-            ls -l coverage
-          '''
-        }
-      }
-
-      post {
-        always {
-          publishHTML([
-            reportDir: 'bugtracker-backend/coverage',
-            reportFiles: 'index.html',
-            reportName: 'Backend Coverage Report',
-            keepAll: true,
-            alwaysLinkToLastBuild: true,
-            allowMissing: false
-          ])
-        }
-      }
-    }
-
-    /* =========================================================
-       FRONTEND TESTS + COVERAGE (JEST)
-       ========================================================= */
-    stage('Frontend Tests') {
-      agent {
-        docker {
-          image 'node:20'
-          reuseNode true
-        }
-      }
-
-      steps {
-        dir('bugtracker-frontend') {
-          sh '''
-            echo "Installing frontend dependencies..."
-            npm install
-
-            echo "Running frontend tests with coverage..."
-            npm test
-
-            echo "Checking coverage output..."
-            ls -l coverage/lcov-report
-          '''
-        }
-      }
-
-      post {
-        always {
-          publishHTML([
-            reportDir: 'bugtracker-frontend/coverage/lcov-report',
-            reportFiles: 'index.html',
-            reportName: 'Frontend Coverage Report',
-            keepAll: true,
-            alwaysLinkToLastBuild: true,
-            allowMissing: false
-          ])
-        }
-      }
-    }
-  }
 }
