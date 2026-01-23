@@ -14,17 +14,26 @@ pipeline {
         }
       }
 
+      environment {
+        GOCACHE     = "${WORKSPACE}/.gocache"
+        GOMODCACHE  = "${WORKSPACE}/.gomodcache"
+      }
+
       steps {
         dir('bugtracker-backend') {
           sh '''
+            echo "Preparing Go cache..."
+            mkdir -p "$GOCACHE" "$GOMODCACHE" reports
+
             echo "Running backend tests..."
             go test -v ./...
 
             echo "Generating backend coverage..."
             go test ./... -coverprofile=coverage.out
 
-            mkdir -p reports
+            echo "Creating HTML coverage report..."
             go tool cover -html=coverage.out -o reports/coverage.html
+
             ls -l reports
           '''
         }
