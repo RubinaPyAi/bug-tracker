@@ -1,11 +1,24 @@
 pipeline {
   agent any
 
+  options {
+    timestamps()
+  }
+
   stages {
 
-    /* =========================
-       BACKEND TESTS + COVERAGE
-       ========================= */
+    /* =========================================================
+       CHECKOUT
+       ========================================================= */
+    stage('Checkout SCM') {
+      steps {
+        checkout scm
+      }
+    }
+
+    /* =========================================================
+       BACKEND TESTS + COVERAGE (GO)
+       ========================================================= */
     stage('Unit Tests - Backend') {
       agent {
         docker {
@@ -15,26 +28,25 @@ pipeline {
       }
 
       environment {
-        GOCACHE     = "${WORKSPACE}/.gocache"
-        GOMODCACHE  = "${WORKSPACE}/.gomodcache"
+        GOCACHE = "${WORKSPACE}/.gocache"
+        GOFLAGS = "-mod=mod"
       }
 
       steps {
         dir('bugtracker-backend') {
           sh '''
-            echo "Preparing Go cache..."
-            mkdir -p "$GOCACHE" "$GOMODCACHE" reports
+            echo "Setting up Go cache..."
+            mkdir -p "$GOCACHE"
 
-            echo "Running backend tests..."
-            go test -v ./...
-
-            echo "Generating backend coverage..."
+            echo "Running backend tests with coverage..."
             go test ./... -coverprofile=coverage.out
 
-            echo "Creating HTML coverage report..."
-            go tool cover -html=coverage.out -o reports/coverage.html
+            echo "Generating HTML coverage report..."
+            mkdir -p coverage
+            go tool cover -html=coverage.out -o coverage/index.html
 
-            ls -l reports
+            echo "Backend coverage files:"
+            ls -l coverage
           '''
         }
       }
@@ -42,8 +54,8 @@ pipeline {
       post {
         always {
           publishHTML([
-            reportDir: 'bugtracker-backend/reports',
-            reportFiles: 'coverage.html',
+            reportDir: 'bugtracker-backend/coverage',
+            reportFiles: 'index.html',
             reportName: 'Backend Coverage Report',
             keepAll: true,
             alwaysLinkToLastBuild: true,
@@ -53,9 +65,9 @@ pipeline {
       }
     }
 
-    /* =========================
-       FRONTEND TESTS + COVERAGE
-       ========================= */
+    /* =========================================================
+       FRONTEND TESTS + COVERAGE (JEST)
+       ========================================================= */
     stage('Frontend Tests') {
       agent {
         docker {
@@ -67,8 +79,13 @@ pipeline {
       steps {
         dir('bugtracker-frontend') {
           sh '''
+            echo "Installing frontend dependencies..."
             npm install
+
+            echo "Running frontend tests with coverage..."
             npm test
+
+            echo "Checking coverage output..."
             ls -l coverage/lcov-report
           '''
         }
