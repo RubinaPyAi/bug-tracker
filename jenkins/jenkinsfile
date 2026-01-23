@@ -4,7 +4,7 @@ pipeline {
   stages {
 
     /* =========================
-       BACKEND UNIT TESTS (GO)
+       BACKEND TESTS + COVERAGE
        ========================= */
     stage('Unit Tests - Backend') {
       agent {
@@ -13,38 +13,39 @@ pipeline {
           reuseNode true
         }
       }
-      environment {
-        GOCACHE = "${WORKSPACE}/.gocache"
-      }
+
       steps {
         dir('bugtracker-backend') {
           sh '''
-            echo "Setting up Go cache..."
-            mkdir -p "$GOCACHE"
-
-            echo "Installing go-junit-report..."
-            go install github.com/jstemmer/go-junit-report/v2@latest
-
-            GO_JUNIT_BIN="$(go env GOPATH)/bin/go-junit-report"
-            echo "Using go-junit-report at: $GO_JUNIT_BIN"
-
             echo "Running backend tests..."
-            go test -v ./... 2>&1 | "$GO_JUNIT_BIN" > test-results.xml
+            go test -v ./...
 
-            echo "Backend test report generated:"
-            ls -l test-results.xml
+            echo "Generating backend coverage..."
+            go test ./... -coverprofile=coverage.out
+
+            mkdir -p reports
+            go tool cover -html=coverage.out -o reports/coverage.html
+            ls -l reports
           '''
         }
       }
+
       post {
         always {
-          junit '**/test-results.xml'
+          publishHTML([
+            reportDir: 'bugtracker-backend/reports',
+            reportFiles: 'coverage.html',
+            reportName: 'Backend Coverage Report',
+            keepAll: true,
+            alwaysLinkToLastBuild: true,
+            allowMissing: false
+          ])
         }
       }
     }
 
     /* =========================
-       FRONTEND UNIT TESTS (JEST)
+       FRONTEND TESTS + COVERAGE
        ========================= */
     stage('Frontend Tests') {
       agent {
@@ -53,27 +54,29 @@ pipeline {
           reuseNode true
         }
       }
+
       steps {
         dir('bugtracker-frontend') {
           sh '''
-            echo "Installing frontend dependencies..."
             npm install
-
-            echo "Running frontend tests..."
             npm test
-
-            echo "Frontend test report generated:"
-            ls -l test-results.xml
+            ls -l coverage/lcov-report
           '''
         }
       }
+
       post {
         always {
-          junit '**/test-results.xml'
+          publishHTML([
+            reportDir: 'bugtracker-frontend/coverage/lcov-report',
+            reportFiles: 'index.html',
+            reportName: 'Frontend Coverage Report',
+            keepAll: true,
+            alwaysLinkToLastBuild: true,
+            allowMissing: false
+          ])
         }
       }
     }
-
   }
 }
-
