@@ -54,8 +54,6 @@ pipeline {
                     sh '''
                       npm ci
                       npm test
-                      mkdir -p reports
-                      mv index.html reports/
                     '''
                 }
             }
