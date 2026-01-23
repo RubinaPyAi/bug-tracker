@@ -69,6 +69,7 @@ pipeline {
                         reportDir: 'bugtracker-frontend/reports',
                         reportFiles: 'coverage.html',
                         reportName: 'Frontend Coverage Report'
+                    ])
                 }
             }
         }
