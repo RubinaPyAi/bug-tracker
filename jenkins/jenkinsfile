@@ -12,7 +12,6 @@ pipeline {
                             image 'golang:1.21'
                             reuseNode true
                             args '-v /var/run/docker.sock:/var/run/docker.sock'
-
                         }
                     }
                     environment {
