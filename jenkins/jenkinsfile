@@ -21,11 +21,8 @@ pipeline {
                         dir('bugtracker-backend') {
                             sh '''
                               go install github.com/jstemmer/go-junit-report/v2@latest
-
                               go test -v ./... -coverprofile=coverage.out 2>&1 | ${GOPATH}/bin/go-junit-report > test-results.xml
-
                               go tool cover -html=coverage.out -o coverage.html
-
                               mkdir -p reports
                               mv coverage.html reports/
                             '''
@@ -47,6 +44,8 @@ pipeline {
                     agent {
                         docker {
                             image 'node:20-alpine'
+                            reuseNode true
+                            args '-v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps {
@@ -110,7 +109,7 @@ pipeline {
                         reportName: 'Playwright API Test Report'
                     ])
                 }
-            }  
+            }
         }
 
         stage('E2E Tests') {
