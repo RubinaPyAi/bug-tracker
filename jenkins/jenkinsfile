@@ -22,10 +22,8 @@ pipeline {
                             sh '''
                               go install github.com/jstemmer/go-junit-report/v2@latest
 
-                              # Run tests + generate junit + coverage
                               go test -v ./... -coverprofile=coverage.out 2>&1 | ${GOPATH}/bin/go-junit-report > test-results.xml
 
-                              # Generate HTML coverage report
                               go tool cover -html=coverage.out -o coverage.html
 
                               mkdir -p reports
@@ -103,6 +101,16 @@ pipeline {
                     '''
                 }
             }
+            post {
+                always {
+                    junit 'tests-api/test-results/results.xml'
+                    publishHTML(target: [
+                        reportDir: 'tests-api/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright API Test Report'
+                    ])
+                }
+            }
         }
     }
 
@@ -110,5 +118,6 @@ pipeline {
         always {
             cleanWs()
         }
+
     }
 }
