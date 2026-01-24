@@ -3,7 +3,7 @@ pipeline {
 
     stages {
 
-        stage('execute unit tests') {
+        stage('Execute Unit Tests') {
             parallel {
 
                 stage('Unit Tests - Backend') {
@@ -13,24 +13,28 @@ pipeline {
                             reuseNode true
                         }
                     }
+
                     environment {
                         GOCACHE = "${WORKSPACE}/.go-cache"
                         GOPATH  = "${WORKSPACE}/.go"
                     }
+
                     steps {
                         dir('bugtracker-backend') {
                             sh '''
-                              go install github.com/jstemmer/go-junit-report/v2@latest
+                                go install github.com/jstemmer/go-junit-report/v2@latest
 
-                              go test -v ./... -coverprofile=coverage.out 2>&1 | ${GOPATH}/bin/go-junit-report > test-results.xml
+                                go test -v ./... -coverprofile=coverage.out 2>&1 \
+                                  | ${GOPATH}/bin/go-junit-report > test-results.xml
 
-                              go tool cover -html=coverage.out -o coverage.html
+                                go tool cover -html=coverage.out -o coverage.html
 
-                              mkdir -p reports
-                              mv coverage.html reports/
+                                mkdir -p reports
+                                mv coverage.html reports/
                             '''
                         }
                     }
+
                     post {
                         always {
                             junit 'bugtracker-backend/test-results.xml'
@@ -49,14 +53,16 @@ pipeline {
                             image 'node:20-alpine'
                         }
                     }
+
                     steps {
                         dir('bugtracker-frontend') {
                             sh '''
-                              npm ci
-                              npm test
+                                npm ci
+                                npm test
                             '''
                         }
                     }
+
                     post {
                         always {
                             junit 'bugtracker-frontend/test-results.xml'
@@ -79,6 +85,7 @@ pipeline {
                     args '-v /var/run/docker.sock:/var/run/docker.sock -u 0'
                 }
             }
+
             steps {
                 sh 'docker compose up --build -d'
             }
@@ -92,15 +99,17 @@ pipeline {
                     args '-u 0 --network=host'
                 }
             }
+
             steps {
                 dir('tests-api') {
                     sh '''
-                      npx wait-port http://localhost:8080/api/health -t 30000
-                      npm ci
-                      npx playwright test
+                        npx wait-port http://localhost:8080/api/health -t 30000
+                        npm ci
+                        npx playwright test
                     '''
                 }
             }
+
             post {
                 always {
                     junit 'tests-api/test-results/results.xml'
@@ -118,6 +127,5 @@ pipeline {
         always {
             cleanWs()
         }
-
     }
 }
