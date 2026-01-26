@@ -150,7 +150,7 @@ pipeline {
             }
         }
 
-        /* ===== DEPLOYMENT (Instructor code) ===== */
+        /* ===== DEPLOYMENT ===== */
 
         stage('Deploy Staging') {
             when {
@@ -183,7 +183,7 @@ pipeline {
                         }
                     }
                 }*/
-            }
+            } 
         }
     }
 
