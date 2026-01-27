@@ -154,9 +154,7 @@ pipeline {
 
         stage('Deploy Staging') {
             when {
-                expression {
-                    return env.GIT_BRANCH == 'origin/main'
-                }
+                branch 'main'
             }
 
             environment {
@@ -170,20 +168,25 @@ pipeline {
 
                 stage('Install Flyctl') {
                     steps {
-                        sh 'mkdir -p $FLYCTL_INSTALL'
-                        sh 'curl -L https://fly.io/install.sh | sh'
-                        sh 'flyctl version'
+                        sh '''
+                            mkdir -p $FLYCTL_INSTALL
+                            curl -L https://fly.io/install.sh | sh
+                            flyctl version
+                        '''
                     }
                 }
 
                 stage('Deploy Backend') {
                     steps {
                         dir('bugtracker-backend') {
-                            sh 'flyctl deploy -a bugtracker-backend-staging --remote-only'
+                            sh '''
+                                export FLY_API_TOKEN=$FLY_API_TOKEN
+                                flyctl deploy -a bugtracker-backend-staging --remote-only
+                            '''
                         }
                     }
                 }
-            } 
+            }
         }
     }
 
