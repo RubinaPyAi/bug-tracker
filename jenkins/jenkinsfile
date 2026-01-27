@@ -153,9 +153,11 @@ pipeline {
         /* ===== DEPLOYMENT ===== */
 
         stage('Deploy Staging') {
-            when {
-                branch 'main'
-            }
+
+            /* ❗ FIX:
+               Removed `when { branch 'main' }`
+               because this is a classic pipeline job
+            */
 
             environment {
                 FLY_API_TOKEN = credentials('FLY_API_TOKEN')
