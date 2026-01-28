@@ -150,14 +150,33 @@ pipeline {
             }
         }
 
+        /* ===== PERFORMANCE TESTS (k6) ===== */
+
+        stage('Performance Tests') {
+            agent {
+                docker {
+                    image 'grafana/k6:latest'
+                    reuseNode true
+                    args '--network=host -u root --entrypoint=""'
+                }
+            }
+
+            steps {
+                dir('tests-perf') {
+                    sh 'k6 run script.js'
+                }
+            }
+
+            post {
+                always {
+                    echo 'Performance tests completed'
+                }
+            }
+        }
+
         /* ===== DEPLOYMENT ===== */
 
         stage('Deploy Staging') {
-
-            /* ❗ FIX:
-               Removed `when { branch 'main' }`
-               because this is a classic pipeline job
-            */
 
             environment {
                 FLY_API_TOKEN = credentials('FLY_API_TOKEN')
