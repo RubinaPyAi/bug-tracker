@@ -169,13 +169,16 @@ pipeline {
 
             post {
                 always {
-                    echo 'Performance tests completed'
+                    publishHTML (target: [
+                        reportDir: 'tests-perf',
+                        reportFiles: 'perf-results.html',
+                        reportName: 'Performance Test Report'
+                    ])
                 }
             }
         }
-
+      
         /* ===== DEPLOYMENT ===== */
-
         stage('Deploy Staging') {
 
             environment {
