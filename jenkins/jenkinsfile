@@ -150,8 +150,6 @@ pipeline {
             }
         }
 
-        /* ===== PERFORMANCE TESTS (k6) ===== */
-
         stage('Performance Tests') {
             agent {
                 docker {
@@ -174,9 +172,9 @@ pipeline {
             }
         }
 
-        /* ===== DEPLOYMENT ===== */
-
-        /*stage('Deploy Staging') {
+        /* ===== DEPLOYMENT (COMMENTED SAFELY) ===== */
+        /*
+        stage('Deploy Staging') {
 
             environment {
                 FLY_API_TOKEN = credentials('FLY_API_TOKEN')
@@ -209,7 +207,8 @@ pipeline {
                 }
             }
         }
-    }*/
+        */
+    }
 
     post {
         always {
