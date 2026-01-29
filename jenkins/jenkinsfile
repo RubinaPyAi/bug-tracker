@@ -167,7 +167,11 @@ pipeline {
 
             post {
                 always {
-                    echo 'Performance tests completed'
+                    publishHTML target: [
+                        reportDir: 'tests-perf/reports',
+                        reportFiles: 'report.html',
+                        reportName: 'K6 Performance Test Report'
+                    ]
                 }
             }
         }
