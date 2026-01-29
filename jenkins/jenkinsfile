@@ -176,7 +176,7 @@ pipeline {
 
         /* ===== DEPLOYMENT ===== */
 
-        stage('Deploy Staging') {
+        /*stage('Deploy Staging') {
 
             environment {
                 FLY_API_TOKEN = credentials('FLY_API_TOKEN')
@@ -209,7 +209,7 @@ pipeline {
                 }
             }
         }
-    }
+    }*/
 
     post {
         always {
