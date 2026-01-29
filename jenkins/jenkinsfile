@@ -150,23 +150,33 @@ pipeline {
             }
         }
 
-        /* ===== PERFORMANCE TESTS (k6) ===== */
+        /* ===== PERFORMANCE TESTS (k6) – FIXED ===== */
 
         stage('Performance Tests') {
             agent {
                 docker {
-                    image 'grafana/k6:latest'
+                    image 'node:20-alpine'
                     reuseNode true
-                    args '--network=host -u root'
+                    args '--network=host'
                 }
             }
 
             steps {
                 dir('tests-perf') {
                     sh '''
-            k6 run script.js --summary-export=summary.json
-            npx k6-reporter summary.json --output index.html
-        '''
+                        apk add --no-cache curl
+
+                        curl -s https://github.com/grafana/k6/releases/download/v0.49.0/k6-v0.49.0-linux-amd64.tar.gz \
+                          | tar -xz --strip-components=1
+
+                        mv k6 /usr/local/bin/
+
+                        npm install -g k6-reporter
+
+                        k6 run script.js --summary-export=summary.json
+
+                        k6-reporter summary.json --output index.html
+                    '''
                 }
             }
 
@@ -184,37 +194,7 @@ pipeline {
         /* ===== DEPLOYMENT (COMMENTED SAFELY) ===== */
         /*
         stage('Deploy Staging') {
-
-            environment {
-                FLY_API_TOKEN = credentials('FLY_API_TOKEN')
-                FLYCTL_INSTALL = "${WORKSPACE}/.fly"
-                PATH = "${FLYCTL_INSTALL}/bin:${PATH}"
-                HOME = "${WORKSPACE}"
-            }
-
-            stages {
-
-                stage('Install Flyctl') {
-                    steps {
-                        sh '''
-                            mkdir -p $FLYCTL_INSTALL
-                            curl -L https://fly.io/install.sh | sh
-                            flyctl version
-                        '''
-                    }
-                }
-
-                stage('Deploy Backend') {
-                    steps {
-                        dir('bugtracker-backend') {
-                            sh '''
-                                export FLY_API_TOKEN=$FLY_API_TOKEN
-                                flyctl deploy -a bugtracker-backend-staging --remote-only
-                            '''
-                        }
-                    }
-                }
-            }
+            ...
         }
         */
     }
