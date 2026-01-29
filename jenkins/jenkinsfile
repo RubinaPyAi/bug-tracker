@@ -169,7 +169,7 @@ pipeline {
 
             post {
                 always {
-                    publishHTML (target: [
+                    publishHTML(target: [
                         reportDir: 'tests-perf',
                         reportFiles: 'index.html',
                         reportName: 'Performance Test Report'
@@ -177,9 +177,10 @@ pipeline {
                 }
             }
         }
-      
-        /* ===== DEPLOYMENT ===== */
-        /*stage('Deploy Staging') {
+
+        /* ===== DEPLOYMENT (COMMENTED SAFELY) ===== */
+        /*
+        stage('Deploy Staging') {
 
             environment {
                 FLY_API_TOKEN = credentials('FLY_API_TOKEN')
@@ -212,12 +213,12 @@ pipeline {
                 }
             }
         }
+        */
     }
 
     post {
         always {
             cleanWs()
         }
-    }*/
+    }
 }
-   
