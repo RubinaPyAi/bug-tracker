@@ -169,9 +169,7 @@ pipeline {
 
             post {
                 always {
-                    PublishHTML target: [
-                        
-                    ]
+                    echo 'Performance tests completed'
                 }
             }
         }
