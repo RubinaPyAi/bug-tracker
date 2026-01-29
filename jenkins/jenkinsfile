@@ -163,7 +163,7 @@ pipeline {
 
             steps {
                 dir('tests-perf') {
-                    sh 'k6 run --out web-dashboard=dashboard.html script.js'
+                    sh 'k6 run --out web-dashboard=index.html script.js'
                 }
             }
 
